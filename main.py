@@ -41,7 +41,7 @@ def add_password():
 def delete_password():
     pass
 
-@app.route('/update', methods=['UPDATE'])
+@app.route('/update', methods=['PATCH'])
 def update_password():
     pass
 
