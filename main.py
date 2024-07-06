@@ -30,7 +30,7 @@ def sign_up_user():
     pass
 
 @app.route('/passwords/' + '<int: id>', methods=['GET'])
-def get_passwords():
+def get_passwords(id):
     pass
     
 @app.route('/add', methods=['POST'])
