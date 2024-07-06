@@ -29,7 +29,7 @@ def login_user():
 def sign_up_user():
     pass
 
-@app.route('/passwords', methods=['GET'])
+@app.route('/passwords/' + '<int: id>', methods=['GET'])
 def get_passwords():
     pass
     
