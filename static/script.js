@@ -2,6 +2,6 @@
 
 window.addEventListener('load', function () {
 
-  console.log("Hello!");
+  console.log("Hello from Event listener!!");
 
 });
