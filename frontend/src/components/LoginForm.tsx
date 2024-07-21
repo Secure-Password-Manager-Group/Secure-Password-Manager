@@ -1,35 +1,61 @@
-import { TextInput, Group, Button } from '@mantine/core';
+import { TextInput, Group, Button, Alert } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { z } from 'zod';
 import { zodResolver } from 'mantine-form-zod-resolver';
 import { passwordSchema } from '../common/helpers';
+import apiClient from '../common/api';
+import { useMutation } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
+import { useAuthStore } from '../store/auth';
+import { useNavigate } from 'react-router-dom';
 
 const schema = z.object({
-    email: z.string().email({ message: 'Invalid email address' }),
+    username: z.string().min(5).max(20),
     password: passwordSchema
 });
 
+type LoginSchema = z.infer<typeof schema>;
+
 export default function LoginForm() {
+    const { setAuth } = useAuthStore();
+    const navigate = useNavigate();
+
     const form = useForm({
         initialValues: {
-            email: '',
+            username: '',
             password: ''
         },
         validate: zodResolver(schema)
     });
 
+    const mutation = useMutation({
+        mutationFn: (values: LoginSchema) =>
+            apiClient.post<{ token: string }>('/login', values),
+        onSuccess: (res, { username }) => {
+            localStorage.setItem('token', res.data.token);
+            setAuth({ username: username, token: res.data.token });
+            form.reset();
+            navigate('/dashboard');
+        },
+        onError: (err) => {
+            let msg = 'Failed to login. Please try again';
+            if (isAxiosError(err)) {
+                msg =
+                    err.response?.data?.Error ||
+                    'Failed to login. Please try again.';
+            }
+            form.setErrors({ apiError: msg });
+        }
+    });
+
     return (
-        <form
-            onSubmit={form.onSubmit((values) => {
-                console.log(values);
-            })}
-        >
+        <form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
             <TextInput
                 withAsterisk
-                label='Email'
-                placeholder='your@email.com'
-                key={form.key('email')}
-                {...form.getInputProps('email')}
+                label='Username'
+                placeholder='username'
+                key={form.key('username')}
+                {...form.getInputProps('username')}
             />
             <TextInput
                 withAsterisk
@@ -39,8 +65,15 @@ export default function LoginForm() {
                 key={form.key('password')}
                 {...form.getInputProps('password')}
             />
+            {form.errors.apiError && (
+                <Alert title='Error' color='red'>
+                    {form.errors.apiError}
+                </Alert>
+            )}
             <Group justify='flex-end' mt='md'>
-                <Button type='submit'>Submit</Button>
+                <Button loading={mutation.isPending} type='submit'>
+                    Submit
+                </Button>
             </Group>
         </form>
     );

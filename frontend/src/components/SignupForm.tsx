@@ -1,12 +1,15 @@
-import { TextInput, Group, Button } from '@mantine/core';
+import { TextInput, Group, Button, Alert } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { z } from 'zod';
 import { zodResolver } from 'mantine-form-zod-resolver';
 import { passwordSchema } from '../common/helpers';
+import { useMutation } from '@tanstack/react-query';
+import apiClient from '../common/api';
+import { isAxiosError } from 'axios';
 
 const schema = z
     .object({
-        email: z.string().email({ message: 'Invalid email address' }),
+        username: z.string().min(5).max(20),
         password: passwordSchema,
         confirmPassword: z.string()
     })
@@ -15,28 +18,51 @@ const schema = z
         path: ['confirmPassword']
     });
 
-export default function SignupForm() {
+type SignupSchema = z.infer<typeof schema>;
+
+type Props = {
+    setTab: (tab: string) => void;
+};
+
+export default function SignupForm({ setTab }: Props) {
     const form = useForm({
         initialValues: {
-            email: '',
+            username: '',
             password: '',
             confirmPassword: ''
         },
         validate: zodResolver(schema)
     });
 
+    const mutation = useMutation({
+        mutationFn: (values: SignupSchema) =>
+            apiClient.post<{ token: string }>('/signUp', {
+                username: values.username,
+                password: values.password
+            }),
+        onSuccess: () => {
+            form.reset();
+            setTab('login');
+        },
+        onError: (err) => {
+            let msg = 'Failed to signup. Please try again.';
+            if (isAxiosError(err)) {
+                msg =
+                    err.response?.data?.Error ||
+                    'Failed to signup. Please try again.';
+            }
+            form.setErrors({ apiError: msg });
+        }
+    });
+
     return (
-        <form
-            onSubmit={form.onSubmit((values) => {
-                console.log(values);
-            })}
-        >
+        <form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
             <TextInput
                 withAsterisk
-                label='Email'
-                placeholder='your@email.com'
-                key={form.key('email')}
-                {...form.getInputProps('email')}
+                label='Username'
+                placeholder='username'
+                key={form.key('username')}
+                {...form.getInputProps('username')}
             />
             <TextInput
                 withAsterisk
@@ -54,6 +80,11 @@ export default function SignupForm() {
                 key={form.key('confirmPassword')}
                 {...form.getInputProps('confirmPassword')}
             />
+            {form.errors.apiError && (
+                <Alert title='Error' color='red'>
+                    {form.errors.apiError}
+                </Alert>
+            )}
             <Group justify='flex-end' mt='md'>
                 <Button type='submit'>Submit</Button>
             </Group>
