@@ -1,5 +1,9 @@
-import { Container, Table } from '@mantine/core';
-import Navbar from '../components/Navbar';
+import { Table } from '@mantine/core';
+import Layout from '../layouts/Layout';
+import { useAuthStore } from '../store/auth';
+import { redirect, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useMounted } from '@mantine/hooks';
 
 const tempData = [
     {
@@ -25,6 +29,18 @@ const tempData = [
 ];
 
 export default function Dashboard() {
+    const { token } = useAuthStore();
+    const mounted = useMounted();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (mounted) {
+            if (!token) {
+                navigate('/');
+            }
+        }
+    }, [mounted, navigate, token]);
+
     const rows = tempData.map((data) => (
         <Table.Tr key={data.id}>
             <Table.Td>{data.url}</Table.Td>
@@ -33,19 +49,16 @@ export default function Dashboard() {
     ));
 
     return (
-        <>
-            <Navbar />
-            <Container>
-                <Table>
-                    <Table.Thead>
-                        <Table.Tr>
-                            <Table.Th>URL</Table.Th>
-                            <Table.Th>Password</Table.Th>
-                        </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>{rows}</Table.Tbody>
-                </Table>
-            </Container>
-        </>
+        <Layout>
+            <Table>
+                <Table.Thead>
+                    <Table.Tr>
+                        <Table.Th>URL</Table.Th>
+                        <Table.Th>Password</Table.Th>
+                    </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>{rows}</Table.Tbody>
+            </Table>
+        </Layout>
     );
 }

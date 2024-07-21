@@ -7,6 +7,7 @@ import apiClient from '../common/api';
 import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useAuthStore } from '../store/auth';
+import { useNavigate } from 'react-router-dom';
 
 const schema = z.object({
     username: z.string().min(5).max(20),
@@ -16,6 +17,9 @@ const schema = z.object({
 type LoginSchema = z.infer<typeof schema>;
 
 export default function LoginForm() {
+    const { setAuth } = useAuthStore();
+    const navigate = useNavigate();
+
     const form = useForm({
         initialValues: {
             username: '',
@@ -24,8 +28,6 @@ export default function LoginForm() {
         validate: zodResolver(schema)
     });
 
-    const { setAuth } = useAuthStore();
-
     const mutation = useMutation({
         mutationFn: (values: LoginSchema) =>
             apiClient.post<{ token: string }>('/login', values),
@@ -33,6 +35,7 @@ export default function LoginForm() {
             localStorage.setItem('token', res.data.token);
             setAuth({ username: username, token: res.data.token });
             form.reset();
+            navigate('/dashboard');
         },
         onError: (err) => {
             let msg = 'Failed to login. Please try again';
