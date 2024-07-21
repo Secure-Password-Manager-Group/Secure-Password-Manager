@@ -144,6 +144,7 @@ def add_password(current_user):
         "username": content["username"],
         "password": encrypted_pwd,
         "user_id": current_user.key.name,
+        "url": content["url"],
     })
     client.put(new_credential)
     return jsonify({"message": "Credential stored successfully"}), 201
