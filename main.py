@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, make_response, render_template
+from flask_cors import CORS
 from google.cloud import datastore
 from google.cloud import storage
 from functools import wraps
@@ -10,7 +11,8 @@ import jwt
 import datetime
 
 app = Flask(__name__)
-app.secret_key = 'SECRET_KEY'
+cors = CORS(app)
+app.secret_key = "SECRET_KEY"
 # app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
 
 

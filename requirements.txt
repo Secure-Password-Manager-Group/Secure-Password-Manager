@@ -3,4 +3,5 @@ google-cloud-datastore==2.19.0
 google-cloud-storage==2.16.0
 requests
 bcrypt
-jwt
+pyjwt==2.8.0
+flask-cors==4.0.1
