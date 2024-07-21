@@ -35,7 +35,7 @@ export default function Home() {
                                 <LoginForm />
                             </Tabs.Panel>
                             <Tabs.Panel value='signup'>
-                                <SignupForm />
+                                <SignupForm setTab={setTab} />
                             </Tabs.Panel>
                         </Tabs>
                     </Grid.Col>

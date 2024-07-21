@@ -1,4 +1,4 @@
-import { TextInput, Group, Button } from '@mantine/core';
+import { TextInput, Group, Button, Alert } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { z } from 'zod';
 import { zodResolver } from 'mantine-form-zod-resolver';
@@ -20,7 +20,11 @@ const schema = z
 
 type SignupSchema = z.infer<typeof schema>;
 
-export default function SignupForm() {
+type Props = {
+    setTab: (tab: string) => void;
+};
+
+export default function SignupForm({ setTab }: Props) {
     const form = useForm({
         initialValues: {
             username: '',
@@ -36,41 +40,23 @@ export default function SignupForm() {
                 username: values.username,
                 password: values.password
             }),
-        onSuccess: (data) => {
-            console.log(data);
+        onSuccess: () => {
+            form.reset();
+            setTab('login');
+        },
+        onError: (err) => {
+            let msg = 'Failed to signup. Please try again.';
+            if (isAxiosError(err)) {
+                msg =
+                    err.response?.data?.Error ||
+                    'Failed to signup. Please try again.';
+            }
+            form.setErrors({ apiError: msg });
         }
     });
 
-    const handleSubmit = async (values: SignupSchema) => {
-        try {
-            await mutation.mutateAsync(values);
-        } catch (err) {
-            if (isAxiosError(err)) {
-                if (err.response) {
-                    // The request was made and the server responded with a status code
-                    // that falls out of the range of 2xx
-                    console.log(err.response.data);
-                    console.log(err.response.status);
-                    console.log(err.response.headers);
-                } else if (err.request) {
-                    // The request was made but no response was received
-                    // `err.request` is an instance of XMLHttpRequest in the browser and an instance of
-                    // http.ClientRequest in node.js
-                    console.log(err.request);
-                } else {
-                    // Something happened in setting up the request that triggered an err
-                    console.log('err', err.message);
-                }
-            }
-        }
-    };
-
     return (
-        <form
-            onSubmit={form.onSubmit((values) => {
-                handleSubmit(values);
-            })}
-        >
+        <form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
             <TextInput
                 withAsterisk
                 label='Username'
@@ -94,6 +80,11 @@ export default function SignupForm() {
                 key={form.key('confirmPassword')}
                 {...form.getInputProps('confirmPassword')}
             />
+            {form.errors.apiError && (
+                <Alert title='Error' color='red'>
+                    {form.errors.apiError}
+                </Alert>
+            )}
             <Group justify='flex-end' mt='md'>
                 <Button type='submit'>Submit</Button>
             </Group>

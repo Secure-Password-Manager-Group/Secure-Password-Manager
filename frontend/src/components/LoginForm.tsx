@@ -1,4 +1,4 @@
-import { TextInput, Group, Button } from '@mantine/core';
+import { TextInput, Group, Button, Alert } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { z } from 'zod';
 import { zodResolver } from 'mantine-form-zod-resolver';
@@ -6,6 +6,7 @@ import { passwordSchema } from '../common/helpers';
 import apiClient from '../common/api';
 import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
+import { useAuthStore } from '../store/auth';
 
 const schema = z.object({
     username: z.string().min(5).max(20),
@@ -23,44 +24,29 @@ export default function LoginForm() {
         validate: zodResolver(schema)
     });
 
+    const { setToken } = useAuthStore();
+
     const mutation = useMutation({
         mutationFn: (values: LoginSchema) =>
             apiClient.post<{ token: string }>('/login', values),
-        onSuccess: (data) => {
-            console.log(data);
+        onSuccess: (res) => {
+            localStorage.setItem('token', res.data.token);
+            setToken(res.data.token);
+            form.reset();
+        },
+        onError: (err) => {
+            let msg = 'Failed to login. Please try again';
+            if (isAxiosError(err)) {
+                msg =
+                    err.response?.data?.Error ||
+                    'Failed to login. Please try again.';
+            }
+            form.setErrors({ apiError: msg });
         }
     });
 
-    const handleSubmit = async (values: LoginSchema) => {
-        try {
-            await mutation.mutateAsync(values);
-        } catch (err) {
-            if (isAxiosError(err)) {
-                if (err.response) {
-                    // The request was made and the server responded with a status code
-                    // that falls out of the range of 2xx
-                    console.log(err.response.data);
-                    console.log(err.response.status);
-                    console.log(err.response.headers);
-                } else if (err.request) {
-                    // The request was made but no response was received
-                    // `err.request` is an instance of XMLHttpRequest in the browser and an instance of
-                    // http.ClientRequest in node.js
-                    console.log(err.request);
-                } else {
-                    // Something happened in setting up the request that triggered an err
-                    console.log('err', err.message);
-                }
-            }
-        }
-    };
-
     return (
-        <form
-            onSubmit={form.onSubmit((values) => {
-                handleSubmit(values as LoginSchema);
-            })}
-        >
+        <form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
             <TextInput
                 withAsterisk
                 label='Username'
@@ -76,8 +62,15 @@ export default function LoginForm() {
                 key={form.key('password')}
                 {...form.getInputProps('password')}
             />
+            {form.errors.apiError && (
+                <Alert title='Error' color='red'>
+                    {form.errors.apiError}
+                </Alert>
+            )}
             <Group justify='flex-end' mt='md'>
-                <Button type='submit'>Submit</Button>
+                <Button loading={mutation.isPending} type='submit'>
+                    Submit
+                </Button>
             </Group>
         </form>
     );
