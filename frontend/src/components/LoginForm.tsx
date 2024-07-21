@@ -24,14 +24,14 @@ export default function LoginForm() {
         validate: zodResolver(schema)
     });
 
-    const { setToken } = useAuthStore();
+    const { setAuth } = useAuthStore();
 
     const mutation = useMutation({
         mutationFn: (values: LoginSchema) =>
             apiClient.post<{ token: string }>('/login', values),
-        onSuccess: (res) => {
+        onSuccess: (res, { username }) => {
             localStorage.setItem('token', res.data.token);
-            setToken(res.data.token);
+            setAuth({ username: username, token: res.data.token });
             form.reset();
         },
         onError: (err) => {

@@ -61,6 +61,10 @@ def token_required(f):
 def home():
     return render_template('index.html')
 
+@app.route("/user", methods=["GET"])
+@token_required
+def get_user(current_user):
+    return jsonify({"username": current_user.key.name}), 200
 
 @app.route('/login', methods=['POST'])
 def login_user():
