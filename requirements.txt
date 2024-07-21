@@ -4,3 +4,4 @@ google-cloud-storage==2.16.0
 requests
 bcrypt
 pyjwt==2.8.0
+flask-cors==4.0.1
