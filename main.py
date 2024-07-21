@@ -8,6 +8,7 @@ import json
 import bcrypt
 import jwt
 import datetime
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 app.secret_key = 'SECRET_KEY'
@@ -15,7 +16,8 @@ app.secret_key = 'SECRET_KEY'
 
 
 client = datastore.Client(project='secure-password-manager-group')
-
+key = Fernet.generate_key()
+fernet = Fernet(key)
 
 ERROR_400 = {"Error": "Invalid Request"}
 ERROR_401 = {"Error": "Unauthorized"}
@@ -116,7 +118,7 @@ def get_passwords(current_user):
             "id": credential.key.id, 
             "username": credential["username"]}
         if "password" in credential:
-            result["password"] = credential["password"].decode('utf-8')
+            result["password"] = fernet.decypt(credential["password"].decode())
         else:
             result["password"] = None
         results.append(result)
@@ -129,8 +131,8 @@ def add_password(current_user):
     content = request.get_json()
     # if not content or 'username' not in content or 'password' not in content:
     #     return jsonify(ERROR_400), 400
-
-    encrypted_pwd = encrypt(content["password"])
+    
+    encrypted_pwd = fernet.encrypt(content["password"].encode())
     new_credential = datastore.Entity(key=client.key("credentials"))
     new_credential.update({
         "username": content["username"],
@@ -165,7 +167,7 @@ def update_password(current_user, id):
     if "username" in content:
         credential["username"] = content["username"]
     if "password" in content:
-        credential["password"] = encrypt(content["password"])
+        credential["password"] = fernet.encrypt(content["password"].encode())
 
     client.put(credential)
     return jsonify({"message": "Credential updated successfully"}), 200
