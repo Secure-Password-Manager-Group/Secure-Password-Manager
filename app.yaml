@@ -1,4 +1,4 @@
-runtime: python312
+runtime: python3.12
 
 handlers:
   # This handler routes all requests not caught above to your main app. It is

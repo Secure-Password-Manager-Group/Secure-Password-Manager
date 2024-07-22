@@ -66,7 +66,7 @@ def home():
 @app.route("/user", methods=["GET"])
 @token_required
 def get_user(current_user):
-    return jsonify({"username": current_user.key.name}), 200
+    return jsonify({"username": current_user['username']}), 200
 
 @app.route('/login', methods=['POST'])
 def login_user():
@@ -90,6 +90,7 @@ def login_user():
     return jsonify({'token': token}), 200   
 
 
+# Create a new site user. Added to users table. 
 @app.route('/signUp', methods=['POST'])
 def sign_up_user():
     content = request.get_json()
@@ -99,10 +100,15 @@ def sign_up_user():
     username = content['username']
     password = encrypt(content['password'])
 
-    key = client.key("users", username)
-    if client.get(key):
+
+    # Check if username exists
+    query = client.query(kind="users")
+    query.add_filter("username", "=", username)
+    username_taken = list(query.fetch())
+
+    if username_taken:
         return jsonify({"Error": "User already exists"}), 400
-    
+        
     new_user = datastore.Entity(key=key)
     new_user.update({
         "username": username,
@@ -116,7 +122,7 @@ def sign_up_user():
 @token_required
 def get_passwords(current_user):
     query = client.query(kind="credentials")
-    query.add_filter("user_id", "=", current_user.key.name)
+    query.add_filter("user_id", "=", current_user.key.id)
     credentials = list(query.fetch())
     results = []
     for credential in credentials:
@@ -131,6 +137,8 @@ def get_passwords(current_user):
     return jsonify(results), 200
 
 
+# Add a new entry to the credentials table. User_id will equal the name/id
+# from the users table
 @app.route('/add', methods=['POST'])
 @token_required
 def add_password(current_user):
@@ -143,7 +151,7 @@ def add_password(current_user):
     new_credential.update({
         "username": content["username"],
         "password": encrypted_pwd,
-        "user_id": current_user.key.name,
+        "user_id": current_user.key.id,  # Link the credentials table with the user id table
         "url": content["url"],
     })
     client.put(new_credential)
@@ -155,7 +163,7 @@ def add_password(current_user):
 def delete_password(current_user, id):
     key = client.key("credentials", id)
     credential = client.get(key)
-    if not credential or credential["user_id"] != current_user.key.name:
+    if not credential or credential["user_id"] != current_user.key.id:
         return jsonify(ERROR_403), 403
     
     client.delete(key)
@@ -168,7 +176,7 @@ def update_password(current_user, id):
     content = request.get_json()
     key = client.key("credentials", id)
     credential = client.get(key)
-    if not credential or credential.get("user_id") != current_user.key.name:
+    if not credential or credential.get("user_id") != current_user.key.id:
         return jsonify(ERROR_403), 403
 
     if "username" in content:
