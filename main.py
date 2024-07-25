@@ -18,7 +18,7 @@ app.secret_key = "SECRET_KEY"
 
 
 client = datastore.Client(project='secure-password-manager-group')
-key = Fernet.generate_key()
+key = b'n7vrXjnrltMFqEiTqR35GbqrDLrNaza_IFUhTgnPJa4='
 fernet = Fernet(key)
 
 ERROR_400 = {"Error": "Invalid Request"}
@@ -118,7 +118,7 @@ def sign_up_user():
     return jsonify({"message": "User created successfully"}), 201
 
 
-@app.route('/passwords/', methods=['GET'])
+@app.route('/passwords', methods=['GET'])
 @token_required
 def get_passwords(current_user):
     query = client.query(kind="credentials")
@@ -128,9 +128,11 @@ def get_passwords(current_user):
     for credential in credentials:
         result = {
             "id": credential.key.id, 
-            "username": credential["username"]}
+            "url": credential["url"],
+            "username": credential["username"]
+        }
         if "password" in credential:
-            result["password"] = fernet.decypt(credential["password"].decode())
+            result["password"] = fernet.decrypt(credential["password"].decode()).decode("utf-8")
         else:
             result["password"] = None
         results.append(result)
