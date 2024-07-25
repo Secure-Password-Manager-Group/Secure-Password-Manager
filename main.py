@@ -128,9 +128,11 @@ def get_passwords(current_user):
     for credential in credentials:
         result = {
             "id": credential.key.id, 
-            "username": credential["username"]}
+            "url": credential["url"],
+            "username": credential["username"]
+        }
         if "password" in credential:
-            result["password"] = fernet.decrypt(credential["password"].decode())
+            result["password"] = fernet.decrypt(credential["password"].decode()).decode("utf-8")
         else:
             result["password"] = None
         results.append(result)
