@@ -5,35 +5,28 @@ import { useAuthStore } from '../store/auth';
 import { useMounted } from '@mantine/hooks';
 
 export default function useCheckToken() {
-    const { clearAuth, setAuth } = useAuthStore();
+    const { setAuth } = useAuthStore();
     const token = useAuthStore((state) => state.token);
     const mounted = useMounted();
 
-    const {
-        isPending,
-        isFetching,
-        data,
-        isError,
-        refetch,
-        isSuccess,
-        isRefetching
-    } = useQuery({
-        queryKey: ['user'],
-        queryFn: () => {
-            const t = token || localStorage.getItem('token');
-            if (!t) {
-                return Promise.resolve({ data: { username: '' } });
-            }
-            return apiClient.get<{ username: string }>('/user', {
-                headers: {
-                    'x-access-tokens': t
+    const { isPending, isFetching, data, refetch, isSuccess, isRefetching } =
+        useQuery({
+            queryKey: ['user'],
+            queryFn: () => {
+                const t = token || localStorage.getItem('token');
+                if (!t) {
+                    return Promise.resolve({ data: { username: '' } });
                 }
-            });
-        },
-        enabled: false,
-        staleTime: 0,
-        retry: false
-    });
+                return apiClient.get<{ username: string }>('/user', {
+                    headers: {
+                        'x-access-tokens': t
+                    }
+                });
+            },
+            enabled: false,
+            staleTime: 0,
+            retry: false
+        });
 
     useEffect(() => {
         if (mounted) {
@@ -47,13 +40,6 @@ export default function useCheckToken() {
             setAuth({ username: data.data.username, token: t });
         }
     }, [isSuccess, data, setAuth, token]);
-
-    useEffect(() => {
-        if (isError) {
-            localStorage.removeItem('token');
-            clearAuth();
-        }
-    }, [isError, clearAuth]);
 
     return {
         isChecking: isPending || isFetching || isRefetching

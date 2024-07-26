@@ -1,9 +1,21 @@
 import { Center, Loader, Table, Text } from '@mantine/core';
-import useCredentialsQuery from '../hooks/useCredentialsQuery';
+import { useQuery } from '@tanstack/react-query';
+import apiClient from '../common/api';
+import { Credential } from '../common/types';
+import { useAuthStore } from '../store/auth';
 import CredentialsTableRow from './CredenitalsTableRow';
 
 export default function CredentialsTable() {
-    const { isPending, isRefetching, isError, data } = useCredentialsQuery();
+    const token = useAuthStore((state) => state.token);
+
+    const { isPending, isError, data, isRefetching } = useQuery({
+        queryKey: ['credentials'],
+        queryFn: () => {
+            return apiClient.get<Credential[]>('/passwords', {
+                headers: { 'x-access-tokens': token }
+            });
+        }
+    });
 
     const getBody = () => {
         if (isPending) {

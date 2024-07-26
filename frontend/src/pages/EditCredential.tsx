@@ -1,5 +1,6 @@
 import { Loader, Stack, Text } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { useEffect } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import apiClient from '../common/api';
@@ -14,7 +15,7 @@ export default function EditCredential() {
     const { isChecking } = useCheckToken();
     const { id } = useParams();
 
-    const { data, isError, isPending, isFetching, refetch } = useQuery({
+    const { data, isError, isPending, isFetching, refetch, error } = useQuery({
         queryKey: ['credential', id],
         enabled: false,
         queryFn: () =>
@@ -43,6 +44,9 @@ export default function EditCredential() {
         }
 
         if (isError) {
+            if (isAxiosError(error) && error.response?.status === 403) {
+                return <Navigate to='/dashboard' />;
+            }
             return <Text>Failed to fetch credential</Text>;
         }
 
