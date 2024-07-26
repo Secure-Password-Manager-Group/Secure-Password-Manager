@@ -8,6 +8,7 @@ import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useAuthStore } from '../store/auth';
 import { useNavigate } from 'react-router-dom';
+import { notifications } from '@mantine/notifications';
 
 const schema = z.object({
     username: z.string().min(5).max(20),
@@ -35,6 +36,11 @@ export default function LoginForm() {
             localStorage.setItem('token', res.data.token);
             setAuth({ username: username, token: res.data.token });
             form.reset();
+            notifications.show({
+                color: 'green',
+                title: 'Login Success',
+                message: `Welcome back, ${username}!`,
+            })
             navigate('/dashboard');
         },
         onError: (err) => {
@@ -44,7 +50,11 @@ export default function LoginForm() {
                     err.response?.data?.Error ||
                     'Failed to login. Please try again.';
             }
-            form.setErrors({ apiError: msg });
+            notifications.show({
+                color: 'red',
+                title: 'Login Error',
+                message: msg,
+            })
         }
     });
 
@@ -65,11 +75,6 @@ export default function LoginForm() {
                 key={form.key('password')}
                 {...form.getInputProps('password')}
             />
-            {form.errors.apiError && (
-                <Alert title='Error' color='red'>
-                    {form.errors.apiError}
-                </Alert>
-            )}
             <Group justify='flex-end' mt='md'>
                 <Button loading={mutation.isPending} type='submit'>
                     Submit

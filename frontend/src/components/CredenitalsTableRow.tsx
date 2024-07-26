@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../common/api';
 import { Credential } from '../common/types';
 import { useAuthStore } from '../store/auth';
+import { notifications } from '@mantine/notifications';
+import { isAxiosError } from 'axios';
 
 type Props = {
     cred: Credential;
@@ -22,7 +24,21 @@ export default function CredentialsTableRow({ cred }: Props) {
                 headers: { 'x-access-tokens': token }
             }),
         onSuccess: () => {
+            notifications.show({
+                color: 'green',
+                title: 'Credential Deleted',
+                message: 'Credential has been successfully deleted'
+            });
             queryClient.invalidateQueries({ queryKey: ['credentials'] });
+        },
+        onError: (err) => {
+            if (isAxiosError(err) && err.response?.status !== 401) {
+                notifications.show({
+                    color: 'red',
+                    title: 'Failed to delete credential',
+                    message: 'Please try again'
+                });
+            }
         }
     });
 
@@ -55,9 +71,7 @@ export default function CredentialsTableRow({ cred }: Props) {
             <Table.Td>
                 <Group>
                     <Button
-                        onClick={() =>
-                            navigate(`/edit-credential/${cred.id}`)
-                        }
+                        onClick={() => navigate(`/edit-credential/${cred.id}`)}
                     >
                         Edit
                     </Button>

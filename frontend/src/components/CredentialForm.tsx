@@ -8,6 +8,7 @@ import apiClient from '../common/api';
 import { Credential } from '../common/types';
 import { useAuthStore } from '../store/auth';
 import { useNavigate } from 'react-router-dom';
+import { notifications } from '@mantine/notifications';
 
 const schema = z.object({
     username: z.string().min(1),
@@ -53,6 +54,11 @@ export default function CredentialForm({ credential }: Props) {
         onSuccess: () => {
             form.reset();
             queryClient.invalidateQueries({ queryKey: ['credentials'] });
+            notifications.show({
+                color: 'green',
+                title: 'Success',
+                message: `Credential ${credential ? 'edited' : 'added'} successfully`
+            });
             navigate('/dashboard');
         },
         onError: (err) => {
@@ -62,7 +68,11 @@ export default function CredentialForm({ credential }: Props) {
                     err.response?.data?.Error ||
                     `Failed to ${credential ? 'edit' : 'add'} credential. Please try again`;
             }
-            form.setErrors({ apiError: msg });
+            notifications.show({
+                color: 'red',
+                title: 'Error',
+                message: msg
+            });
         }
     });
 
@@ -90,11 +100,6 @@ export default function CredentialForm({ credential }: Props) {
                 key={form.key('password')}
                 {...form.getInputProps('password')}
             />
-            {form.errors.apiError && (
-                <Alert title='Error' color='red'>
-                    {form.errors.apiError}
-                </Alert>
-            )}
             <Group justify='flex-end' mt='md'>
                 <Button loading={mutation.isPending} type='submit'>
                     {credential ? 'Edit' : 'Add'} Credential

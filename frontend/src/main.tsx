@@ -16,6 +16,8 @@ import Home from './pages/Home.tsx';
 import EditCredential from './pages/EditCredential.tsx';
 import { isAxiosError } from 'axios';
 import { useAuthStore } from './store/auth.ts';
+import '@mantine/notifications/styles.css'
+import { Notifications } from '@mantine/notifications';
 
 const queryClient = new QueryClient({
     queryCache: new QueryCache({
@@ -59,6 +61,7 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <MantineProvider>
+            <Notifications />
             <QueryClientProvider client={queryClient}>
                 <RouterProvider router={router} />
             </QueryClientProvider>
