@@ -1,23 +1,22 @@
-import { Button, Stack, Text } from '@mantine/core';
-import { useMounted } from '@mantine/hooks';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Button, Loader, Stack, Text } from '@mantine/core';
+import { Navigate, useNavigate } from 'react-router-dom';
 import CredentialsTable from '../components/CredentialsTable';
 import Layout from '../layouts/Layout';
 import { useAuthStore } from '../store/auth';
+import useCheckToken from '../hooks/useCheckToken';
 
 export default function Dashboard() {
-    const { token } = useAuthStore();
-    const mounted = useMounted();
+    const { isChecking } = useCheckToken();
+    const token = useAuthStore((state) => state.token);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (mounted) {
-            if (!token) {
-                navigate('/');
-            }
-        }
-    }, [mounted, navigate, token]);
+    if (isChecking) {
+        return <Loader />;
+    }
+
+    if (!token) {
+        return <Navigate to='/' />;
+    }
 
     return (
         <Layout>
@@ -25,7 +24,9 @@ export default function Dashboard() {
                 <Text mx='auto' size='xl'>
                     Credentials
                 </Text>
-                <Button onClick={() => navigate('/add-credential')}>Add Credential</Button>
+                <Button onClick={() => navigate('/add-credential')}>
+                    Add Credential
+                </Button>
                 <CredentialsTable />
             </Stack>
         </Layout>

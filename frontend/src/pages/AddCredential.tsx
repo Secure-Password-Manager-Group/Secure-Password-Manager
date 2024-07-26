@@ -1,23 +1,21 @@
-import { Stack, Text } from '@mantine/core';
-import { useMounted } from '@mantine/hooks';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Loader, Stack, Text } from '@mantine/core';
+import { Navigate } from 'react-router-dom';
 import CredentialForm from '../components/CredentialForm';
 import Layout from '../layouts/Layout';
 import { useAuthStore } from '../store/auth';
+import useCheckToken from '../hooks/useCheckToken';
 
 export default function AddCredential() {
-    const { token } = useAuthStore();
-    const mounted = useMounted();
-    const navigate = useNavigate();
+    const token = useAuthStore((state) => state.token);
+    const { isChecking } = useCheckToken();
 
-    useEffect(() => {
-        if (mounted) {
-            if (!token) {
-                navigate('/');
-            }
-        }
-    }, [mounted, navigate, token]);
+    if (isChecking) {
+        return <Loader />;
+    }
+
+    if (!token) {
+        return <Navigate to='/' />;
+    }
 
     return (
         <Layout>

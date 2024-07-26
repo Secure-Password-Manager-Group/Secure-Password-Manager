@@ -5,8 +5,8 @@ export default function Navbar() {
     const { token, username, clearAuth } = useAuthStore();
 
     const handleLogout = () => {
-        clearAuth();
         localStorage.removeItem('token');
+        clearAuth();
     };
 
     return (

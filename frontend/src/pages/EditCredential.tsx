@@ -1,19 +1,19 @@
 import { Loader, Stack, Text } from '@mantine/core';
-import { useMounted } from '@mantine/hooks';
-import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import CredentialForm from '../components/CredentialForm';
-import Layout from '../layouts/Layout';
-import { useAuthStore } from '../store/auth';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
 import apiClient from '../common/api';
 import { Credential } from '../common/types';
+import CredentialForm from '../components/CredentialForm';
+import useCheckToken from '../hooks/useCheckToken';
+import Layout from '../layouts/Layout';
+import { useAuthStore } from '../store/auth';
 
 export default function EditCredential() {
-    const { token } = useAuthStore();
-    const mounted = useMounted();
-    const navigate = useNavigate();
+    const token = useAuthStore((state) => state.token);
+    const { isChecking } = useCheckToken();
     const { id } = useParams();
+
     const { data, isError, isPending, isFetching, refetch } = useQuery({
         queryKey: ['credential', id],
         enabled: false,
@@ -24,13 +24,18 @@ export default function EditCredential() {
     });
 
     useEffect(() => {
-        if (mounted) {
-            if (!token) {
-                navigate('/');
-            }
+        if (!isChecking && token) {
             refetch();
         }
-    }, [mounted, navigate, token, refetch]);
+    }, [isChecking, token, refetch]);
+
+    if (isChecking) {
+        return <Loader />;
+    }
+
+    if (!token) {
+        return <Navigate to='/' />;
+    }
 
     const getContent = () => {
         if (isPending || isFetching) {

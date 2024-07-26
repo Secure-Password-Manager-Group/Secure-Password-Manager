@@ -1,25 +1,24 @@
-import { Grid, Stack, Tabs, Text } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { Grid, Loader, Stack, Tabs, Text } from '@mantine/core';
+import { useState } from 'react';
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
 import Layout from '../layouts/Layout';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
-import { useMounted } from '@mantine/hooks';
+import useCheckToken from '../hooks/useCheckToken';
 
 export default function Home() {
     const [tab, setTab] = useState<string>('login');
-    const navigate = useNavigate();
-    const mounted = useMounted();
-    const { token } = useAuthStore();
+    const token = useAuthStore((state) => state.token);
+    const { isChecking } = useCheckToken();
 
-    useEffect(() => {
-        if (mounted) {
-            if (token) {
-                navigate('/dashboard');
-            }
-        }
-    }, [mounted, navigate, token]);
+    if (isChecking) {
+        return <Loader />;
+    }
+
+    if (token) {
+        return <Navigate to='/dashboard' />;
+    }
 
     return (
         <Layout>
