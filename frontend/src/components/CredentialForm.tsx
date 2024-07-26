@@ -1,11 +1,13 @@
-import { TextInput, Group, Button, Alert } from '@mantine/core';
+import { Alert, Button, Group, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { z } from 'zod';
-import { zodResolver } from 'mantine-form-zod-resolver';
-import apiClient from '../common/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
+import { zodResolver } from 'mantine-form-zod-resolver';
+import { z } from 'zod';
+import apiClient from '../common/api';
+import { Credential } from '../common/types';
 import { useAuthStore } from '../store/auth';
+import { useNavigate } from 'react-router-dom';
 
 const schema = z.object({
     username: z.string().min(1),
@@ -16,38 +18,49 @@ const schema = z.object({
 type CredentialSchema = z.infer<typeof schema>;
 
 type Props = {
-    close: () => void;
+    credential?: Credential;
 };
 
-export default function CredentialForm({ close }: Props) {
+export default function CredentialForm({ credential }: Props) {
     const queryClient = useQueryClient();
     const { token } = useAuthStore();
+    const navigate = useNavigate();
 
     const form = useForm({
         initialValues: {
-            username: '',
-            password: '',
-            url: ''
+            username: credential?.username || '',
+            password: credential?.password || '',
+            url: credential?.url || ''
         },
         validate: zodResolver(schema)
     });
 
     const mutation = useMutation({
-        mutationFn: (values: CredentialSchema) =>
-            apiClient.post<{ token: string }>('/add', values, {
+        mutationFn: (values: CredentialSchema) => {
+            if (credential) {
+                return apiClient.patch<{ token: string }>(
+                    `/update/${credential.id}`,
+                    values,
+                    {
+                        headers: { 'x-access-tokens': token }
+                    }
+                );
+            }
+            return apiClient.post<{ token: string }>('/add', values, {
                 headers: { 'x-access-tokens': token }
-            }),
+            });
+        },
         onSuccess: () => {
             form.reset();
             queryClient.invalidateQueries({ queryKey: ['credentials'] });
-            close();
+            navigate('/dashboard');
         },
         onError: (err) => {
-            let msg = 'Failed to add credential. Please try again';
+            let msg = `Failed to ${credential ? 'edit' : 'add'} credential. Please try again`;
             if (isAxiosError(err)) {
                 msg =
                     err.response?.data?.Error ||
-                    'Failed to add credential. Please try again.';
+                    `Failed to ${credential ? 'edit' : 'add'} credential. Please try again`;
             }
             form.setErrors({ apiError: msg });
         }
@@ -84,7 +97,7 @@ export default function CredentialForm({ close }: Props) {
             )}
             <Group justify='flex-end' mt='md'>
                 <Button loading={mutation.isPending} type='submit'>
-                    Add Credential
+                    {credential ? 'Edit' : 'Add'} Credential
                 </Button>
             </Group>
         </form>

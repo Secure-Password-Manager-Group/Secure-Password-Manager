@@ -1,20 +1,8 @@
-import {
-    Button,
-    Center,
-    Loader,
-    Modal,
-    Stack,
-    Table,
-    Text
-} from '@mantine/core';
-import CredentialsTableRow from './CredenitalsTableRow';
-import CredentialForm from './CredentialForm';
-import { useDisclosure } from '@mantine/hooks';
+import { Center, Loader, Table, Text } from '@mantine/core';
 import useCredentialsQuery from '../hooks/useCredentialsQuery';
+import CredentialsTableRow from './CredenitalsTableRow';
 
 export default function CredentialsTable() {
-    const [opened, { open, close }] = useDisclosure(false);
-
     const { isPending, isRefetching, isError, data } = useCredentialsQuery();
 
     const getBody = () => {
@@ -73,35 +61,24 @@ export default function CredentialsTable() {
     };
 
     return (
-        <>
-            <Modal opened={opened} onClose={close} title='Add Credential'>
-                <CredentialForm close={close} />
-            </Modal>
-            <Stack pb={10}>
-                <Text mx='auto' size='xl'>
-                    Credentials
-                </Text>
-                <Button onClick={open}>Add Credential</Button>
-            </Stack>
-            <Table>
-                <Table.Thead>
-                    <Table.Tr>
-                        <Table.Th>
-                            <Text>URL</Text>
-                        </Table.Th>
-                        <Table.Th>
-                            <Text>Username</Text>
-                        </Table.Th>
-                        <Table.Th>
-                            <Text>Password</Text>
-                        </Table.Th>
-                        <Table.Th>
-                            <Text>Actions</Text>
-                        </Table.Th>
-                    </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>{getBody()}</Table.Tbody>
-            </Table>
-        </>
+        <Table>
+            <Table.Thead>
+                <Table.Tr>
+                    <Table.Th>
+                        <Text>URL</Text>
+                    </Table.Th>
+                    <Table.Th>
+                        <Text>Username</Text>
+                    </Table.Th>
+                    <Table.Th>
+                        <Text>Password</Text>
+                    </Table.Th>
+                    <Table.Th>
+                        <Text>Actions</Text>
+                    </Table.Th>
+                </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>{getBody()}</Table.Tbody>
+        </Table>
     );
 }

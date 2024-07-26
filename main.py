@@ -138,6 +138,21 @@ def get_passwords(current_user):
         results.append(result)
     return jsonify(results), 200
 
+@app.route("/passwords/<int:id>", methods=["GET"])
+@token_required
+def get_password_by_id(current_user, id):
+    key = client.key("credentials", id)
+    credential = client.get(key)
+    if not credential or credential["user_id"] != current_user.key.id:
+        return jsonify(ERROR_403), 403
+    return jsonify(
+        {
+            "id": id,
+            "url": credential["url"],
+            "username": credential["username"],
+            "password": fernet.decrypt(credential["password"].decode()).decode("utf-8"),
+        }
+    ), 200
 
 # Add a new entry to the credentials table. User_id will equal the name/id
 # from the users table
@@ -183,6 +198,8 @@ def update_password(current_user, id):
 
     if "username" in content:
         credential["username"] = content["username"]
+    if "url" in content:
+        credential["url"] = content["url"]
     if "password" in content:
         credential["password"] = fernet.encrypt(content["password"].encode())
 
