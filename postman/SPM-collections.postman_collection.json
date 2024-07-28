@@ -10,15 +10,39 @@
 			"name": "Login",
 			"request": {
 				"method": "POST",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}login",
+					"host": [
+						"{{app_url}}login"
+					]
+				}
 			},
 			"response": []
 		},
 		{
 			"name": "Sign_up",
 			"request": {
+				"auth": {
+					"type": "bearer"
+				},
 				"method": "POST",
-				"header": []
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"username\": \"testuser\",\r\n        \"password\": \"testpassword\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}signUp",
+					"host": [
+						"{{app_url}}signUp"
+					]
+				}
 			},
 			"response": []
 		},
@@ -26,15 +50,37 @@
 			"name": "Create",
 			"request": {
 				"method": "POST",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}add",
+					"host": [
+						"{{app_url}}add"
+					]
+				}
 			},
 			"response": []
 		},
 		{
 			"name": "Read",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}passwords",
+					"host": [
+						"{{app_url}}passwords"
+					]
+				}
 			},
 			"response": []
 		},
@@ -42,7 +88,51 @@
 			"name": "Update",
 			"request": {
 				"method": "PATCH",
-				"header": []
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "        \"username\": \"testupdateuser\"\r\n        \"password\": \"testupdatepassword\"",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}update/{{id}}",
+					"host": [
+						"{{app_url}}update"
+					],
+					"path": [
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"testuser\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}user",
+					"host": [
+						"{{app_url}}user"
+					]
+				}
 			},
 			"response": []
 		},
@@ -50,7 +140,25 @@
 			"name": "Delete",
 			"request": {
 				"method": "DELETE",
-				"header": []
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"testuser\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}delete/{{id}}",
+					"host": [
+						"{{app_url}}delete"
+					],
+					"path": [
+						"{{id}}"
+					]
+				}
 			},
 			"response": []
 		}
