@@ -109,7 +109,7 @@ def sign_up_user():
     if username_taken:
         return jsonify({"Error": "User already exists"}), 400
 
-    db_key = client.key("users", username)    
+    db_key = client.key("users")    
     new_user = datastore.Entity(key=db_key)
     new_user.update({
         "username": username,
