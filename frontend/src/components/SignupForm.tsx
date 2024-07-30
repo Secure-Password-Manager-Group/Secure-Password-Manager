@@ -1,4 +1,4 @@
-import { TextInput, Group, Button, Alert } from '@mantine/core';
+import { TextInput, Group, Button, Alert, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { z } from 'zod';
 import { zodResolver } from 'mantine-form-zod-resolver';
@@ -67,32 +67,34 @@ export default function SignupForm({ setTab }: Props) {
 
     return (
         <form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
-            <TextInput
-                withAsterisk
-                label='Username'
-                placeholder='username'
-                key={form.key('username')}
-                {...form.getInputProps('username')}
-            />
-            <TextInput
-                withAsterisk
-                label='Password'
-                placeholder='Password'
-                type='password'
-                key={form.key('password')}
-                {...form.getInputProps('password')}
-            />
-            <TextInput
-                withAsterisk
-                label='Confirm Password'
-                placeholder='Confirm Password'
-                type='password'
-                key={form.key('confirmPassword')}
-                {...form.getInputProps('confirmPassword')}
-            />
-            <Group justify='flex-end' mt='md'>
-                <Button type='submit'>Submit</Button>
-            </Group>
+            <Stack gap='md'>
+                <TextInput
+                    withAsterisk
+                    label='Username'
+                    placeholder='username'
+                    key={form.key('username')}
+                    {...form.getInputProps('username')}
+                />
+                <TextInput
+                    withAsterisk
+                    label='Password'
+                    placeholder='Password'
+                    type='password'
+                    key={form.key('password')}
+                    {...form.getInputProps('password')}
+                />
+                <TextInput
+                    withAsterisk
+                    label='Confirm Password'
+                    placeholder='Confirm Password'
+                    type='password'
+                    key={form.key('confirmPassword')}
+                    {...form.getInputProps('confirmPassword')}
+                />
+                <Button mt='md' size='md' color='cyan' type='submit'>
+                    Signup
+                </Button>
+            </Stack>
         </form>
     );
 }
