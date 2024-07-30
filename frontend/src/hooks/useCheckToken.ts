@@ -1,41 +1,47 @@
-import { useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import apiClient from '../common/api';
 import { useAuthStore } from '../store/auth';
 import { useMounted } from '@mantine/hooks';
 
 export default function useCheckToken() {
-    const [isLoading, setIsLoading] = useState<boolean>(true);
     const { setAuth } = useAuthStore();
+    const token = useAuthStore((state) => state.token);
     const mounted = useMounted();
 
-    const { mutate } = useMutation({
-        mutationFn: (values: { token: string }) =>
-            apiClient.get<{ username: string }>('/user', {
-                headers: {
-                    'x-access-tokens': values.token
+    const { isPending, isFetching, data, refetch, isSuccess, isRefetching } =
+        useQuery({
+            queryKey: ['user'],
+            queryFn: () => {
+                const t = token || localStorage.getItem('token');
+                if (!t) {
+                    return Promise.resolve({ data: { username: '' } });
                 }
-            }),
-        onSuccess: (res, { token }) => {
-            setAuth({ username: res.data.username, token });
-            setIsLoading(false);
-        },
-        onError: () => {
-            localStorage.removeItem('token');
-            setIsLoading(false);
-        }
-    });
+                return apiClient.get<{ username: string }>('/user', {
+                    headers: {
+                        'x-access-tokens': t
+                    }
+                });
+            },
+            enabled: false,
+            staleTime: 0,
+            retry: false
+        });
 
     useEffect(() => {
         if (mounted) {
-            const token = localStorage.getItem('token');
-            if (token) {
-                mutate({ token });
-            } else {
-                setIsLoading(false);
-            }
+            refetch();
         }
-    }, [mutate, mounted]);
+    }, [refetch, mounted]);
 
-    return { isLoading };
+    useEffect(() => {
+        if (isSuccess && data && data.data.username && !token) {
+            const t = localStorage.getItem('token');
+            setAuth({ username: data.data.username, token: t });
+        }
+    }, [isSuccess, data, setAuth, token]);
+
+    return {
+        isChecking: isPending || isFetching || isRefetching
+    };
 }

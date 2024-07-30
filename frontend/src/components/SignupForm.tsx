@@ -6,6 +6,7 @@ import { passwordSchema } from '../common/helpers';
 import { useMutation } from '@tanstack/react-query';
 import apiClient from '../common/api';
 import { isAxiosError } from 'axios';
+import { notifications } from '@mantine/notifications';
 
 const schema = z
     .object({
@@ -40,8 +41,13 @@ export default function SignupForm({ setTab }: Props) {
                 username: values.username,
                 password: values.password
             }),
-        onSuccess: () => {
+        onSuccess: (_, { username }) => {
             form.reset();
+            notifications.show({
+                color: 'green',
+                title: 'Signup Success',
+                message: `Thank you for signing up, ${username}! Please login.`
+            });
             setTab('login');
         },
         onError: (err) => {
@@ -51,7 +57,11 @@ export default function SignupForm({ setTab }: Props) {
                     err.response?.data?.Error ||
                     'Failed to signup. Please try again.';
             }
-            form.setErrors({ apiError: msg });
+            notifications.show({
+                color: 'red',
+                title: 'Signup Error',
+                message: msg
+            });
         }
     });
 
@@ -80,11 +90,6 @@ export default function SignupForm({ setTab }: Props) {
                 key={form.key('confirmPassword')}
                 {...form.getInputProps('confirmPassword')}
             />
-            {form.errors.apiError && (
-                <Alert title='Error' color='red'>
-                    {form.errors.apiError}
-                </Alert>
-            )}
             <Group justify='flex-end' mt='md'>
                 <Button type='submit'>Submit</Button>
             </Group>
