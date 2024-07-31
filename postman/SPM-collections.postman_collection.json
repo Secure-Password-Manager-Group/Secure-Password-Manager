@@ -7,21 +7,19 @@
 	},
 	"item": [
 		{
-			"name": "Login",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "{{app_url}}login",
-					"host": [
-						"{{app_url}}login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Sign_up",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer"
@@ -47,10 +45,67 @@
 			"response": []
 		},
 		{
-			"name": "Create",
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get the auth token\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    console.log(jsonData);\r",
+							"    var token = jsonData['token'];\r",
+							"    pm.expect(token).to.not.be.undefined;\r",
+							"    pm.globals.set(\"token\", token);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"username\": \"testuser\",\r\n        \"password\": \"testpassword\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}login",
+					"host": [
+						"{{app_url}}login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-access-tokens",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"username\": \"testupdateuser\",\r\n        \"password\": \"testupdatepassword\",\r\n        \"url\": \"www.example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "{{app_url}}add",
 					"host": [
@@ -62,6 +117,9 @@
 		},
 		{
 			"name": "Read",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -75,6 +133,15 @@
 				},
 				"method": "GET",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "{{app_url}}passwords",
 					"host": [
@@ -87,11 +154,21 @@
 		{
 			"name": "Update",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PATCH",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "        \"username\": \"testupdateuser\"\r\n        \"password\": \"testupdatepassword\"",
+					"raw": "{\r\n        \"username\": \"testupdateuser\",\r\n        \"password\": \"testupdatepassword\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -139,6 +216,16 @@
 		{
 			"name": "Delete",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "DELETE",
 				"header": [],
 				"body": {
@@ -183,6 +270,12 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": ""
 		}
 	]
 }
