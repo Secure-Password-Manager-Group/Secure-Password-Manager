@@ -77,13 +77,19 @@ def login_user():
     username = content['username']
     password = content['password']
 
-    key = client.key("users", username)
-    user = client.get(key)
-    if not user or not verify_password(user['password'], password):
+    query = client.query(kind="users")
+    query.add_filter("username", "=", username)
+    user = list(query.fetch())
+
+    fUser = user[0]
+    user_id = fUser.id
+
+    if not user or not verify_password(user[0]['password'], password):
         return jsonify(ERROR_401), 401
 
     token = jwt.encode({
-        'public_id': username,
+        'public_id': user_id,
+        'username': username,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
     }, app.secret_key, algorithm="HS256")
     
