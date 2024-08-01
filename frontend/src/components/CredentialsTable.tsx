@@ -30,11 +30,23 @@ export default function CredentialsTable() {
     const getBody = () => {
         if (isPending || isFetching) {
             return (
-                <Table.Tr>
-                    <Table.Td colSpan={4}>
-                        <Skeleton height={100} />
-                    </Table.Td>
-                </Table.Tr>
+                <>
+                    <Table.Tr>
+                        <Table.Td colSpan={4}>
+                            <Skeleton height={30} />
+                        </Table.Td>
+                    </Table.Tr>
+                    <Table.Tr>
+                        <Table.Td colSpan={4}>
+                            <Skeleton height={30} />
+                        </Table.Td>
+                    </Table.Tr>
+                    <Table.Tr>
+                        <Table.Td colSpan={4}>
+                            <Skeleton height={30} />
+                        </Table.Td>
+                    </Table.Tr>
+                </>
             );
         }
 
@@ -90,16 +102,16 @@ export default function CredentialsTable() {
             <Table.Thead>
                 <Table.Tr>
                     <Table.Th>
-                        <Text>URL</Text>
+                        <Text size='xl'>URL</Text>
                     </Table.Th>
                     <Table.Th>
-                        <Text>Username</Text>
+                        <Text size='xl'>Username</Text>
                     </Table.Th>
                     <Table.Th>
-                        <Text>Password</Text>
+                        <Text size='xl'>Password</Text>
                     </Table.Th>
                     <Table.Th>
-                        <Text>Actions</Text>
+                        <Text size='xl'>Actions</Text>
                     </Table.Th>
                 </Table.Tr>
             </Table.Thead>

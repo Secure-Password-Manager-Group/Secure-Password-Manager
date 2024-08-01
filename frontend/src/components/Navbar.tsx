@@ -1,4 +1,5 @@
-import { Box, Button, Container, Group, Text } from '@mantine/core';
+import { Box, Button, Container, Group, ThemeIcon, Title } from '@mantine/core';
+import { IconLock } from '@tabler/icons-react';
 import { useAuthStore } from '../store/auth';
 
 export default function Navbar() {
@@ -12,15 +13,20 @@ export default function Navbar() {
     return (
         <Box bg='dark.4' px='lg' h='50px'>
             <Container h='100%'>
-                {' '}
                 <Group justify='space-between' h='100%'>
-                    <Text size='xl'>Secure Password Manager</Text>
+                    <Group gap={0}>
+                        <ThemeIcon color='cyan' variant='subtle' size='xl'>
+                            <IconLock style={{ width: '70%', height: '70%' }} />
+                        </ThemeIcon>
+                        <Title order={3}>Secure Password Manager</Title>
+                    </Group>
                     {token && (
                         <Group>
-                            <Text>{username}</Text>
+                            <Title order={5}>{username}</Title>
                             <Button
-                                variant='filled'
+                                variant='outline'
                                 color='red'
+                                size='xs'
                                 onClick={() => handleLogout()}
                             >
                                 Logout

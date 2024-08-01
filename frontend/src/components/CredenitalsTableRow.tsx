@@ -5,8 +5,7 @@ import {
     Group,
     Overlay,
     Table,
-    Text,
-    Tooltip
+    Text
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import {
@@ -61,10 +60,38 @@ export default function CredentialsTableRow({ cred }: Props) {
     return (
         <Table.Tr>
             <Table.Td>
-                <Text>{cred.url}</Text>
+                <Group gap='xs'>
+                    <Text>{cred.url}</Text>
+                    <CopyButton value={cred.url} timeout={500}>
+                        {({ copied, copy }) => (
+                            <ActionIcon
+                                color={copied ? 'cyan' : 'gray'}
+                                size='sm'
+                                variant='subtle'
+                                onClick={copy}
+                            >
+                                {copied ? <IconCheck /> : <IconCopy />}
+                            </ActionIcon>
+                        )}
+                    </CopyButton>
+                </Group>
             </Table.Td>
             <Table.Td>
-                <Text>{cred.username}</Text>
+                <Group gap='xs'>
+                    <Text>{cred.username}</Text>
+                    <CopyButton value={cred.username} timeout={500}>
+                        {({ copied, copy }) => (
+                            <ActionIcon
+                                color={copied ? 'cyan' : 'gray'}
+                                size='sm'
+                                variant='subtle'
+                                onClick={copy}
+                            >
+                                {copied ? <IconCheck /> : <IconCopy />}
+                            </ActionIcon>
+                        )}
+                    </CopyButton>
+                </Group>
             </Table.Td>
             <Table.Td>
                 <Group gap='xs'>
@@ -79,36 +106,24 @@ export default function CredentialsTableRow({ cred }: Props) {
                             />
                         )}
                     </Flex>
-                    <Tooltip
-                        label={visible ? 'Hide password' : 'Show password'}
-                        withArrow
-                        position='bottom'
+                    <ActionIcon
+                        onClick={() => setVisible(!visible)}
+                        variant='subtle'
+                        color='gray'
+                        size='sm'
                     >
-                        <ActionIcon
-                            onClick={() => setVisible(!visible)}
-                            variant='subtle'
-                            color='gray'
-                            size='sm'
-                        >
-                            {!visible ? <IconEye /> : <IconEyeOff />}
-                        </ActionIcon>
-                    </Tooltip>
-                    <CopyButton value={cred.password} timeout={2000}>
+                        {!visible ? <IconEye /> : <IconEyeOff />}
+                    </ActionIcon>
+                    <CopyButton value={cred.password} timeout={500}>
                         {({ copied, copy }) => (
-                            <Tooltip
-                                label={copied ? 'Copied' : 'Copy'}
-                                withArrow
-                                position='bottom'
+                            <ActionIcon
+                                color={copied ? 'cyan' : 'gray'}
+                                size='sm'
+                                variant='subtle'
+                                onClick={copy}
                             >
-                                <ActionIcon
-                                    color={copied ? 'cyan' : 'gray'}
-                                    size='sm'
-                                    variant='subtle'
-                                    onClick={copy}
-                                >
-                                    {copied ? <IconCheck /> : <IconCopy />}
-                                </ActionIcon>
-                            </Tooltip>
+                                {copied ? <IconCheck /> : <IconCopy />}
+                            </ActionIcon>
                         )}
                     </CopyButton>
                 </Group>
