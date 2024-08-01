@@ -32,7 +32,6 @@ export default function LoginForm() {
         mutationFn: (values: LoginSchema) =>
             apiClient.post<{ token: string }>('/login', values),
         onSuccess: (res, { username }) => {
-            localStorage.setItem('token', res.data.token);
             setAuth({ username: username, token: res.data.token });
             form.reset();
             notifications.show({
@@ -43,15 +42,19 @@ export default function LoginForm() {
             navigate('/dashboard');
         },
         onError: (err) => {
+            if (isAxiosError(err) && err.response?.status === 401) {
+                return;
+            }
             let msg = 'Failed to login. Please try again';
             if (isAxiosError(err)) {
                 msg =
                     err.response?.data?.Error ||
+                    err.response?.data?.message ||
                     'Failed to login. Please try again.';
             }
             notifications.show({
                 color: 'red',
-                title: 'Login Error',
+                title: 'Login Failed',
                 message: msg
             });
         }

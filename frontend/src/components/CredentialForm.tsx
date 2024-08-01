@@ -56,21 +56,25 @@ export default function CredentialForm({ credential }: Props) {
             queryClient.invalidateQueries({ queryKey: ['credentials'] });
             notifications.show({
                 color: 'green',
-                title: 'Success',
+                title: `${credential ? 'Edit' : 'Add'} Credential Success`,
                 message: `Credential ${credential ? 'edited' : 'added'} successfully`
             });
             navigate('/dashboard');
         },
         onError: (err) => {
+            if (isAxiosError(err) && err.response?.status === 401) {
+                return;
+            }
             let msg = `Failed to ${credential ? 'edit' : 'add'} credential. Please try again`;
             if (isAxiosError(err)) {
                 msg =
                     err.response?.data?.Error ||
+                    err.response?.data?.message ||
                     `Failed to ${credential ? 'edit' : 'add'} credential. Please try again`;
             }
             notifications.show({
                 color: 'red',
-                title: 'Error',
+                title: `${credential ? 'Edit' : 'Add'} Credential Failed`,
                 message: msg
             });
         }

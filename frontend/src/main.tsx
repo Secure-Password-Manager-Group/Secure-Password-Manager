@@ -18,21 +18,30 @@ import EditCredential from './pages/EditCredential.tsx';
 import Error from './pages/Error.tsx';
 import Home from './pages/Home.tsx';
 import { useAuthStore } from './store/auth.ts';
+import { notifications } from '@mantine/notifications';
 
 const queryClient = new QueryClient({
     queryCache: new QueryCache({
         onError: (error) => {
             if (isAxiosError(error) && error.response?.status === 401) {
-                localStorage.removeItem('token');
                 useAuthStore.getState().clearAuth();
+                notifications.show({
+                    color: 'red',
+                    title: 'Session Expired',
+                    message: 'Please login again.'
+                });
             }
         }
     }),
     mutationCache: new MutationCache({
         onError: (error) => {
             if (isAxiosError(error) && error.response?.status === 401) {
-                localStorage.removeItem('token');
                 useAuthStore.getState().clearAuth();
+                notifications.show({
+                    color: 'red',
+                    title: 'Session Expired',
+                    message: 'Please login again.'
+                });
             }
         }
     })

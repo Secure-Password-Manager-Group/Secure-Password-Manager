@@ -41,19 +41,27 @@ export default function CredentialsTableRow({ cred }: Props) {
         onSuccess: () => {
             notifications.show({
                 color: 'green',
-                title: 'Credential Deleted',
+                title: 'Delete Credential Success',
                 message: 'Credential has been successfully deleted'
             });
             queryClient.invalidateQueries({ queryKey: ['credentials'] });
         },
         onError: (err) => {
-            if (isAxiosError(err) && err.response?.status !== 401) {
-                notifications.show({
-                    color: 'red',
-                    title: 'Failed to delete credential',
-                    message: 'Please try again'
-                });
+            if (isAxiosError(err) && err.response?.status === 401) {
+                return;
             }
+            let msg = 'Failed to delete credential. Please try again';
+            if (isAxiosError(err)) {
+                msg =
+                    err.response?.data?.Error ||
+                    err.response?.data?.message ||
+                    'Failed to delete credential. Please try again';
+            }
+            notifications.show({
+                color: 'red',
+                title: 'Delete Credential Failed',
+                message: msg
+            });
         }
     });
 
