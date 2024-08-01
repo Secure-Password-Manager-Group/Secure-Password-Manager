@@ -1,6 +1,7 @@
-import { Grid, Loader, Stack, Tabs, Text, Title } from '@mantine/core';
+import { Grid, Stack, Tabs, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import Loading from '../components/Loading';
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
 import useCheckToken from '../hooks/useCheckToken';
@@ -13,7 +14,7 @@ export default function Home() {
     const { isChecking } = useCheckToken();
 
     if (isChecking) {
-        return <Loader />;
+        return <Loading />;
     }
 
     if (token) {

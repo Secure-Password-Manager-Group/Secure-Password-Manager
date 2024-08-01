@@ -1,16 +1,17 @@
-import { Loader, Stack, Text } from '@mantine/core';
+import { Stack, Title } from '@mantine/core';
 import { Navigate } from 'react-router-dom';
 import CredentialForm from '../components/CredentialForm';
 import Layout from '../layouts/Layout';
 import { useAuthStore } from '../store/auth';
 import useCheckToken from '../hooks/useCheckToken';
+import Loading from '../components/Loading';
 
 export default function AddCredential() {
     const token = useAuthStore((state) => state.token);
     const { isChecking } = useCheckToken();
 
     if (isChecking) {
-        return <Loader />;
+        return <Loading />;
     }
 
     if (!token) {
@@ -20,9 +21,9 @@ export default function AddCredential() {
     return (
         <Layout>
             <Stack>
-                <Text mx='auto' size='xl'>
+                <Title order={1} mx='auto'>
                     Add Credential
-                </Text>
+                </Title>
                 <CredentialForm />
             </Stack>
         </Layout>

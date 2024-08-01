@@ -1,7 +1,8 @@
-import { ActionIcon, Group, Loader, Stack, Title } from '@mantine/core';
+import { ActionIcon, Group, Stack, Title } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import CredentialsTable from '../components/CredentialsTable';
+import Loading from '../components/Loading';
 import useCheckToken from '../hooks/useCheckToken';
 import Layout from '../layouts/Layout';
 import { useAuthStore } from '../store/auth';
@@ -9,10 +10,9 @@ import { useAuthStore } from '../store/auth';
 export default function Dashboard() {
     const { isChecking } = useCheckToken();
     const token = useAuthStore((state) => state.token);
-    const navigate = useNavigate();
 
     if (isChecking) {
-        return <Loader />;
+        return <Loading />;
     }
 
     if (!token) {
@@ -26,8 +26,9 @@ export default function Dashboard() {
                     <Title order={1}>Credentials</Title>
                     <ActionIcon
                         size='lg'
+                        component={Link}
                         color='cyan'
-                        onClick={() => navigate('/add-credential')}
+                        to='/add-credential'
                     >
                         <IconPlus />
                     </ActionIcon>

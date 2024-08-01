@@ -1,5 +1,15 @@
-import { Center, Loader, Table, Text } from '@mantine/core';
+import {
+    Button,
+    Center,
+    Loader,
+    Skeleton,
+    Stack,
+    Table,
+    Text
+} from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import apiClient from '../common/api';
 import { Credential } from '../common/types';
 import { useAuthStore } from '../store/auth';
@@ -8,7 +18,7 @@ import CredentialsTableRow from './CredenitalsTableRow';
 export default function CredentialsTable() {
     const token = useAuthStore((state) => state.token);
 
-    const { isPending, isError, data, isRefetching } = useQuery({
+    const { isPending, isFetching, isError, data } = useQuery({
         queryKey: ['credentials'],
         queryFn: () => {
             return apiClient.get<Credential[]>('/passwords', {
@@ -18,13 +28,11 @@ export default function CredentialsTable() {
     });
 
     const getBody = () => {
-        if (isPending) {
+        if (isPending || isFetching) {
             return (
                 <Table.Tr>
                     <Table.Td colSpan={4}>
-                        <Center>
-                            <Loader />
-                        </Center>
+                        <Skeleton height={100} />
                     </Table.Td>
                 </Table.Tr>
             );
@@ -35,7 +43,10 @@ export default function CredentialsTable() {
                 <Table.Tr>
                     <Table.Td colSpan={4}>
                         <Center>
-                            <Text>Failed to fetch credentials</Text>
+                            <Text size='xl'>
+                                Failed to fetch credentials. Please try again
+                                later.
+                            </Text>
                         </Center>
                     </Table.Td>
                 </Table.Tr>
@@ -47,7 +58,18 @@ export default function CredentialsTable() {
                 <Table.Tr>
                     <Table.Td colSpan={4}>
                         <Center>
-                            <Text>No credentials found</Text>
+                            <Stack>
+                                <Text size='xl'>No credentials found.</Text>
+                                <Button
+                                    component={Link}
+                                    size='md'
+                                    leftSection={<IconPlus />}
+                                    color='cyan'
+                                    to='/add-credential'
+                                >
+                                    Add Credential
+                                </Button>
+                            </Stack>
                         </Center>
                     </Table.Td>
                 </Table.Tr>
@@ -59,15 +81,6 @@ export default function CredentialsTable() {
                 {data.data.map((cred) => (
                     <CredentialsTableRow cred={cred} key={cred.id} />
                 ))}
-                {isRefetching && (
-                    <Table.Tr>
-                        <Table.Td colSpan={4}>
-                            <Center>
-                                <Loader />
-                            </Center>
-                        </Table.Td>
-                    </Table.Tr>
-                )}
             </>
         );
     };

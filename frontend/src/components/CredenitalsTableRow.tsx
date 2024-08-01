@@ -20,7 +20,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import apiClient from '../common/api';
 import { Credential } from '../common/types';
 import { useAuthStore } from '../store/auth';
@@ -33,7 +33,6 @@ export default function CredentialsTableRow({ cred }: Props) {
     const { token } = useAuthStore();
     const [visible, setVisible] = useState<boolean>(false);
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
 
     const mutation = useMutation({
         mutationFn: (id: number) =>
@@ -117,9 +116,10 @@ export default function CredentialsTableRow({ cred }: Props) {
             <Table.Td>
                 <Group gap='xs'>
                     <ActionIcon
+                        component={Link}
                         variant='subtle'
                         color='cyan'
-                        onClick={() => navigate(`/edit-credential/${cred.id}`)}
+                        to={`/edit-credential/${cred.id}`}
                     >
                         <IconEdit />
                     </ActionIcon>
