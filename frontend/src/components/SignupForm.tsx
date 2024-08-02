@@ -1,12 +1,12 @@
-import { TextInput, Group, Button, Alert } from '@mantine/core';
+import { Alert, Button, Group, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { z } from 'zod';
-import { zodResolver } from 'mantine-form-zod-resolver';
-import { passwordSchema } from '../common/helpers';
-import { useMutation } from '@tanstack/react-query';
-import apiClient from '../common/api';
-import { isAxiosError } from 'axios';
 import { notifications } from '@mantine/notifications';
+import { useMutation } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
+import { zodResolver } from 'mantine-form-zod-resolver';
+import { z } from 'zod';
+import apiClient from '../common/api';
+import { passwordSchema } from '../common/helpers';
 
 const schema = z
     .object({
@@ -51,15 +51,19 @@ export default function SignupForm({ setTab }: Props) {
             setTab('login');
         },
         onError: (err) => {
+            if (isAxiosError(err) && err.response?.status === 401) {
+                return;
+            }
             let msg = 'Failed to signup. Please try again.';
             if (isAxiosError(err)) {
                 msg =
                     err.response?.data?.Error ||
+                    err.response?.data?.message ||
                     'Failed to signup. Please try again.';
             }
             notifications.show({
                 color: 'red',
-                title: 'Signup Error',
+                title: 'Signup Failed',
                 message: msg
             });
         }
@@ -67,32 +71,34 @@ export default function SignupForm({ setTab }: Props) {
 
     return (
         <form onSubmit={form.onSubmit((values) => mutation.mutate(values))}>
-            <TextInput
-                withAsterisk
-                label='Username'
-                placeholder='username'
-                key={form.key('username')}
-                {...form.getInputProps('username')}
-            />
-            <TextInput
-                withAsterisk
-                label='Password'
-                placeholder='Password'
-                type='password'
-                key={form.key('password')}
-                {...form.getInputProps('password')}
-            />
-            <TextInput
-                withAsterisk
-                label='Confirm Password'
-                placeholder='Confirm Password'
-                type='password'
-                key={form.key('confirmPassword')}
-                {...form.getInputProps('confirmPassword')}
-            />
-            <Group justify='flex-end' mt='md'>
-                <Button type='submit'>Submit</Button>
-            </Group>
+            <Stack gap='md'>
+                <TextInput
+                    withAsterisk
+                    label='Username'
+                    placeholder='username'
+                    key={form.key('username')}
+                    {...form.getInputProps('username')}
+                />
+                <TextInput
+                    withAsterisk
+                    label='Password'
+                    placeholder='Password'
+                    type='password'
+                    key={form.key('password')}
+                    {...form.getInputProps('password')}
+                />
+                <TextInput
+                    withAsterisk
+                    label='Confirm Password'
+                    placeholder='Confirm Password'
+                    type='password'
+                    key={form.key('confirmPassword')}
+                    {...form.getInputProps('confirmPassword')}
+                />
+                <Button mt='md' size='md' color='cyan' type='submit'>
+                    Signup
+                </Button>
+            </Stack>
         </form>
     );
 }

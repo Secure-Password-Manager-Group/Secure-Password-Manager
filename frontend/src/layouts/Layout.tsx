@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import Navbar from '../components/Navbar';
-import { Container } from '@mantine/core';
+import { Box, Container } from '@mantine/core';
 
 type Props = {
     children: ReactNode;
@@ -8,9 +8,9 @@ type Props = {
 
 export default function Layout({ children }: Props) {
     return (
-        <>
+        <Box bg='dark.8' h='100vh'>
             <Navbar />
-            <Container>{children}</Container>
-        </>
+            <Container pt={30}>{children}</Container>
+        </Box>
     );
 }

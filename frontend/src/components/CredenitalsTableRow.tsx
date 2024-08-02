@@ -1,12 +1,28 @@
-import { Button, Flex, Group, Overlay, Table, Text } from '@mantine/core';
+import {
+    ActionIcon,
+    CopyButton,
+    Flex,
+    Group,
+    Overlay,
+    Table,
+    Text
+} from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import {
+    IconCheck,
+    IconCopy,
+    IconEdit,
+    IconEye,
+    IconEyeOff,
+    IconTrash
+} from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import apiClient from '../common/api';
 import { Credential } from '../common/types';
 import { useAuthStore } from '../store/auth';
-import { notifications } from '@mantine/notifications';
-import { isAxiosError } from 'axios';
 
 type Props = {
     cred: Credential;
@@ -16,7 +32,6 @@ export default function CredentialsTableRow({ cred }: Props) {
     const { token } = useAuthStore();
     const [visible, setVisible] = useState<boolean>(false);
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
 
     const mutation = useMutation({
         mutationFn: (id: number) =>
@@ -26,32 +41,68 @@ export default function CredentialsTableRow({ cred }: Props) {
         onSuccess: () => {
             notifications.show({
                 color: 'green',
-                title: 'Credential Deleted',
+                title: 'Delete Credential Success',
                 message: 'Credential has been successfully deleted'
             });
             queryClient.invalidateQueries({ queryKey: ['credentials'] });
         },
         onError: (err) => {
-            if (isAxiosError(err) && err.response?.status !== 401) {
-                notifications.show({
-                    color: 'red',
-                    title: 'Failed to delete credential',
-                    message: 'Please try again'
-                });
+            if (isAxiosError(err) && err.response?.status === 401) {
+                return;
             }
+            let msg = 'Failed to delete credential. Please try again';
+            if (isAxiosError(err)) {
+                msg =
+                    err.response?.data?.Error ||
+                    err.response?.data?.message ||
+                    'Failed to delete credential. Please try again';
+            }
+            notifications.show({
+                color: 'red',
+                title: 'Delete Credential Failed',
+                message: msg
+            });
         }
     });
 
     return (
         <Table.Tr>
             <Table.Td>
-                <Text>{cred.url}</Text>
+                <Group gap='xs'>
+                    <Text>{cred.url}</Text>
+                    <CopyButton value={cred.url} timeout={500}>
+                        {({ copied, copy }) => (
+                            <ActionIcon
+                                color={copied ? 'cyan' : 'gray'}
+                                size='sm'
+                                variant='subtle'
+                                onClick={copy}
+                            >
+                                {copied ? <IconCheck /> : <IconCopy />}
+                            </ActionIcon>
+                        )}
+                    </CopyButton>
+                </Group>
             </Table.Td>
             <Table.Td>
-                <Text>{cred.username}</Text>
+                <Group gap='xs'>
+                    <Text>{cred.username}</Text>
+                    <CopyButton value={cred.username} timeout={500}>
+                        {({ copied, copy }) => (
+                            <ActionIcon
+                                color={copied ? 'cyan' : 'gray'}
+                                size='sm'
+                                variant='subtle'
+                                onClick={copy}
+                            >
+                                {copied ? <IconCheck /> : <IconCopy />}
+                            </ActionIcon>
+                        )}
+                    </CopyButton>
+                </Group>
             </Table.Td>
             <Table.Td>
-                <Flex gap={10}>
+                <Group gap='xs'>
                     <Flex pos='relative'>
                         <Text>{cred.password}</Text>
                         {!visible && (
@@ -63,24 +114,46 @@ export default function CredentialsTableRow({ cred }: Props) {
                             />
                         )}
                     </Flex>
-                    <Button onClick={() => setVisible(!visible)}>
-                        {!visible ? 'Show' : 'Hide'}
-                    </Button>
-                </Flex>
+                    <ActionIcon
+                        onClick={() => setVisible(!visible)}
+                        variant='subtle'
+                        color='gray'
+                        size='sm'
+                    >
+                        {!visible ? <IconEye /> : <IconEyeOff />}
+                    </ActionIcon>
+                    <CopyButton value={cred.password} timeout={500}>
+                        {({ copied, copy }) => (
+                            <ActionIcon
+                                color={copied ? 'cyan' : 'gray'}
+                                size='sm'
+                                variant='subtle'
+                                onClick={copy}
+                            >
+                                {copied ? <IconCheck /> : <IconCopy />}
+                            </ActionIcon>
+                        )}
+                    </CopyButton>
+                </Group>
             </Table.Td>
             <Table.Td>
-                <Group>
-                    <Button
-                        onClick={() => navigate(`/edit-credential/${cred.id}`)}
+                <Group gap='xs'>
+                    <ActionIcon
+                        component={Link}
+                        variant='subtle'
+                        color='cyan'
+                        to={`/edit-credential/${cred.id}`}
                     >
-                        Edit
-                    </Button>
-                    <Button
+                        <IconEdit />
+                    </ActionIcon>
+                    <ActionIcon
+                        color='red'
+                        variant='subtle'
                         loading={mutation.isPending}
                         onClick={() => mutation.mutate(cred.id)}
                     >
-                        Delete
-                    </Button>
+                        <IconTrash />
+                    </ActionIcon>
                 </Group>
             </Table.Td>
         </Table.Tr>

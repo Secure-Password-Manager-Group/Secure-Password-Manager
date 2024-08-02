@@ -1,4 +1,4 @@
-import { Loader, Stack, Text } from '@mantine/core';
+import { Loader, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useEffect } from 'react';
@@ -6,6 +6,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import apiClient from '../common/api';
 import { Credential } from '../common/types';
 import CredentialForm from '../components/CredentialForm';
+import Loading from '../components/Loading';
 import useCheckToken from '../hooks/useCheckToken';
 import Layout from '../layouts/Layout';
 import { useAuthStore } from '../store/auth';
@@ -31,7 +32,7 @@ export default function EditCredential() {
     }, [isChecking, token, refetch]);
 
     if (isChecking) {
-        return <Loader />;
+        return <Loading />;
     }
 
     if (!token) {
@@ -40,14 +41,20 @@ export default function EditCredential() {
 
     const getContent = () => {
         if (isPending || isFetching) {
-            return <Loader />;
+            return (
+                <Stack gap="xl" mt={20}>
+                    <Skeleton height={40} />
+                    <Skeleton height={40} />
+                    <Skeleton height={40} />
+                </Stack>
+            );
         }
 
         if (isError) {
             if (isAxiosError(error) && error.response?.status === 403) {
                 return <Navigate to='/dashboard' />;
             }
-            return <Text>Failed to fetch credential</Text>;
+            return <Text>Failed to fetch credential. Please try again.</Text>;
         }
 
         return <CredentialForm credential={data.data} />;
@@ -56,9 +63,9 @@ export default function EditCredential() {
     return (
         <Layout>
             <Stack>
-                <Text mx='auto' size='xl'>
+                <Title order={1} mx='auto'>
                     Edit Credential
-                </Text>
+                </Title>
                 {getContent()}
             </Stack>
         </Layout>
