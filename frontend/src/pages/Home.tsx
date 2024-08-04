@@ -1,11 +1,12 @@
-import { Grid, Loader, Stack, Tabs, Text } from '@mantine/core';
+import { Grid, Stack, Tabs, Text, Title } from '@mantine/core';
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import Loading from '../components/Loading';
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
-import Layout from '../layouts/Layout';
-import { Navigate } from 'react-router-dom';
-import { useAuthStore } from '../store/auth';
 import useCheckToken from '../hooks/useCheckToken';
+import Layout from '../layouts/Layout';
+import { useAuthStore } from '../store/auth';
 
 export default function Home() {
     const [tab, setTab] = useState<string>('login');
@@ -13,7 +14,7 @@ export default function Home() {
     const { isChecking } = useCheckToken();
 
     if (isChecking) {
-        return <Loader />;
+        return <Loading />;
     }
 
     if (token) {
@@ -22,11 +23,11 @@ export default function Home() {
 
     return (
         <Layout>
-            <Grid>
-                <Grid.Col span={6}>
-                    <Stack>
-                        <Text>Welcome!</Text>
-                        <Text>
+            <Grid gutter='lg'>
+                <Grid.Col span={6} mih={380}>
+                    <Stack align='stretch' justify='space-evenly' h='100%'>
+                        <Title order={1}>Welcome!</Title>
+                        <Text size='lg'>
                             Use this app to store all your passwords! Rest
                             assured that all data is encrypted and secure!
                         </Text>
@@ -34,18 +35,23 @@ export default function Home() {
                 </Grid.Col>
                 <Grid.Col span={6}>
                     <Tabs
+                        color='cyan'
                         value={tab}
                         onChange={(value) => setTab(value || 'login')}
                     >
                         <Tabs.List grow justify='center'>
-                            <Tabs.Tab value='login'>Login</Tabs.Tab>
-                            <Tabs.Tab value='signup'>Signup</Tabs.Tab>
+                            <Tabs.Tab value='login'>
+                                <Text>Login</Text>
+                            </Tabs.Tab>
+                            <Tabs.Tab value='signup'>
+                                <Text>Signup</Text>
+                            </Tabs.Tab>
                         </Tabs.List>
 
-                        <Tabs.Panel value='login'>
+                        <Tabs.Panel value='login' mt={20}>
                             <LoginForm />
                         </Tabs.Panel>
-                        <Tabs.Panel value='signup'>
+                        <Tabs.Panel value='signup' mt={20}>
                             <SignupForm setTab={setTab} />
                         </Tabs.Panel>
                     </Tabs>
