@@ -10,6 +10,7 @@ import bcrypt
 import jwt
 import datetime
 from cryptography.fernet import Fernet
+import uuid
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -48,7 +49,7 @@ def token_required(f):
             return jsonify(ERROR_401), 401
         try: # Decoding the Token:
             data = jwt.decode(token, app.secret_key, algorithms=["HS256"])
-            current_user = client.get(client.key("users", data['public_id']))
+            current_user = get_user_by_public_id(data['public_id'])
             if current_user is None:
                 return jsonify(ERROR_401), 401
         except jwt.ExpiredSignatureError:
@@ -58,10 +59,17 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorated
 
+# Helper function for def token_required() 
+def get_user_by_public_id(public_id):
+    query = client.query(kind="users")
+    query.add_filter("public_id", "=", public_id)
+    result = list(query.fetch())
+    return result[0] if result else None
 
 @app.route('/')
 def home():
     return render_template('index.html')
+    
 
 @app.route("/user", methods=["GET"])
 @token_required
@@ -77,14 +85,21 @@ def login_user():
     username = content['username']
     password = content['password']
 
-    key = client.key("users", username)
-    user = client.get(key)
-    if not user or not verify_password(user['password'], password):
+    query = client.query(kind="users")
+    query.add_filter("username", "=", username)
+    users = list(query.fetch())
+
+    #change to query of that kind so all those queries go through so that and it can find teh right one for that knd
+    if not users or not verify_password(users[0]['password'], password):
         return jsonify(ERROR_401), 401
+    
+    user = users[0]
+    user_id = user['public'] # Retrive the public_id for token generation
 
     token = jwt.encode({
-        'public_id': username,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        'public_id': user_id,
+        'username': username,
+        'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=40)
     }, app.secret_key, algorithm="HS256")
     
     return jsonify({'token': token}), 200   
@@ -109,11 +124,15 @@ def sign_up_user():
     if username_taken:
         return jsonify({"Error": "User already exists"}), 400
 
-    db_key = client.key("users")    
+    # Generate a unique public_id for the new user
+    public_id = str(uuid.uuid4())
+
+    db_key = client.key("users", public_id)    
     new_user = datastore.Entity(key=db_key)
     new_user.update({
         "username": username,
-        "password": password
+        "password": password,
+        "public_id": public_id
     })
     client.put(new_user)
     return jsonify({"message": "User created successfully"}), 201
@@ -122,9 +141,11 @@ def sign_up_user():
 @app.route('/passwords', methods=['GET'])
 @token_required
 def get_passwords(current_user):
+    # Filter credentials by user_id that matches the current user's public_id
     query = client.query(kind="credentials")
-    query.add_filter("user_id", "=", current_user.key.id)
+    query.add_filter("user_id", "=", current_user['public_id'])
     credentials = list(query.fetch())
+
     results = []
     for credential in credentials:
         result = {
@@ -144,8 +165,11 @@ def get_passwords(current_user):
 def get_password_by_id(current_user, id):
     key = client.key("credentials", id)
     credential = client.get(key)
-    if not credential or credential["user_id"] != current_user.key.id:
+
+    # Use the public_id to verify ownserhip
+    if not credential or credential["user_id"] != current_user['public_id']]:
         return jsonify(ERROR_403), 403
+        
     return jsonify(
         {
             "id": id,
@@ -161,15 +185,15 @@ def get_password_by_id(current_user, id):
 @token_required
 def add_password(current_user):
     content = request.get_json()
-    # if not content or 'username' not in content or 'password' not in content:
-    #     return jsonify(ERROR_400), 400
+    if not content or 'username' not in content or 'password' not in content:
+         return jsonify(ERROR_400), 400
     
     encrypted_pwd = fernet.encrypt(content["password"].encode())
     new_credential = datastore.Entity(key=client.key("credentials"))
     new_credential.update({
         "username": content["username"],
         "password": encrypted_pwd,
-        "user_id": current_user.key.id,  # Link the credentials table with the user id table
+        "user_id": current_user['public_id'],  # Link the credentials table with the user id table
         "url": content["url"],
     })
     client.put(new_credential)
@@ -181,7 +205,9 @@ def add_password(current_user):
 def delete_password(current_user, id):
     key = client.key("credentials", id)
     credential = client.get(key)
-    if not credential or credential["user_id"] != current_user.key.id:
+
+    # Use the public_id to verify ownership
+    if not credential or credential["user_id"] != current_user['public_id']]:
         return jsonify(ERROR_403), 403
     
     client.delete(key)
@@ -194,7 +220,9 @@ def update_password(current_user, id):
     content = request.get_json()
     key = client.key("credentials", id)
     credential = client.get(key)
-    if not credential or credential.get("user_id") != current_user.key.id:
+
+    # Use the public_id to verify ownership
+    if not credential or credential.get("user_id") != current_user["public_id"]:
         return jsonify(ERROR_403), 403
 
     if "username" in content:
