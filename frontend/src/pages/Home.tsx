@@ -25,7 +25,12 @@ export default function Home() {
         <Layout>
             <Grid gutter='lg'>
                 <Grid.Col span={6} mih={380}>
-                    <Stack align='stretch' justify='space-evenly' h='100%'>
+                    <Stack
+                        align='stretch'
+                        justify='space-evenly'
+                        h='100%'
+                        py='xl'
+                    >
                         <Title order={1}>Welcome!</Title>
                         <Text size='lg'>
                             Use this app to store all your passwords! Rest

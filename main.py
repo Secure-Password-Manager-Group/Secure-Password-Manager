@@ -91,10 +91,10 @@ def login_user():
 
     #change to query of that kind so all those queries go through so that and it can find teh right one for that knd
     if not users or not verify_password(users[0]['password'], password):
-        return jsonify(ERROR_401), 401
+        return jsonify(ERROR_400), 400
     
     user = users[0]
-    user_id = user['public'] # Retrive the public_id for token generation
+    user_id = user['public_id'] # Retrive the public_id for token generation
 
     token = jwt.encode({
         'public_id': user_id,
@@ -167,7 +167,7 @@ def get_password_by_id(current_user, id):
     credential = client.get(key)
 
     # Use the public_id to verify ownserhip
-    if not credential or credential["user_id"] != current_user['public_id']]:
+    if not credential or credential["user_id"] != current_user['public_id']:
         return jsonify(ERROR_403), 403
         
     return jsonify(
@@ -207,7 +207,7 @@ def delete_password(current_user, id):
     credential = client.get(key)
 
     # Use the public_id to verify ownership
-    if not credential or credential["user_id"] != current_user['public_id']]:
+    if not credential or credential["user_id"] != current_user['public_id']:
         return jsonify(ERROR_403), 403
     
     client.delete(key)
