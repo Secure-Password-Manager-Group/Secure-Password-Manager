@@ -1,4 +1,4 @@
-import { Button, Group, Stack, TextInput } from '@mantine/core';
+import { Button, Group, Stack, TextInput, PasswordInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -97,11 +97,10 @@ export default function CredentialForm({ credential }: Props) {
                     key={form.key('url')}
                     {...form.getInputProps('url')}
                 />
-                <TextInput
+                <PasswordInput
                     withAsterisk
                     label='Password'
                     placeholder='mypassword'
-                    type='password'
                     key={form.key('password')}
                     {...form.getInputProps('password')}
                 />

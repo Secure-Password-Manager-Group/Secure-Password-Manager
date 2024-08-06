@@ -1,4 +1,4 @@
-import { Button, Stack, TextInput } from '@mantine/core';
+import { Button, PasswordInput, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMutation } from '@tanstack/react-query';
@@ -70,11 +70,10 @@ export default function LoginForm() {
                     key={form.key('username')}
                     {...form.getInputProps('username')}
                 />
-                <TextInput
+                <PasswordInput
                     withAsterisk
                     label='Password'
                     placeholder='Password'
-                    type='password'
                     key={form.key('password')}
                     {...form.getInputProps('password')}
                 />
