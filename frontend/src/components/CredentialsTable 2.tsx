@@ -1,13 +1,11 @@
 import {
     Button,
     Center,
-    
     Skeleton,
     Stack,
     Table,
     Text
-} from '@mantine/core';
-// removed Loader (declared but not used)
+} from '@mantine/core'; //Loader temp removed
 import { IconPlus } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';

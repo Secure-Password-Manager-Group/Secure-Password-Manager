@@ -1,8 +1,39 @@
-runtime: python3.12
+runtime: python312
+
+entrypoint: gunicorn -b :$PORT main:app
+
 
 handlers:
-  # This handler routes all requests not caught above to your main app. It is
-  # required when static routes are defined, but can be omitted (along with
-  # the entire handlers section) when there are no static files defined.
-- url: /.*
-  script: auto
+  - url: /assets
+    static_dir: frontend/dist/assets
+
+  - url: /favicon-32x32.png
+    static_files: frontend/dist/favicon-32x32.png
+    upload: frontend/dist/favicon-32x32.png
+
+  - url: /favicon-16x16.png
+    static_files: frontend/dist/favicon-16x16.png
+    upload: frontend/dist/favicon-16x16.png
+
+  - url: /favicon.ico
+    static_files: frontend/dist/favicon.ico
+    upload: frontend/dist/favicon.ico
+
+  - url: /apple-touch-icon.png
+    static_files: frontend/dist/apple-touch-icon.png
+    upload: frontend/dist/apple-touch-icon.png
+
+  - url: /site.webmanifest
+    static_files: frontend/dist/site.webmanifest
+    upload: frontend/dist/site.webmanifest
+
+  - url: /.*
+    static_files: frontend/dist/index.html
+    upload: frontend/dist/index.html
+# handlers:
+#   - url: /static
+#     static_dir: frontend/dist
+
+#   - url: /.*
+#     script: auto
+    

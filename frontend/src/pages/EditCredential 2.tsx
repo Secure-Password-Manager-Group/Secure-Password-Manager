@@ -1,5 +1,4 @@
-import { Skeleton, Stack, Text, Title } from '@mantine/core';
-// removed Loader until it's needed
+import { Skeleton, Stack, Text, Title } from '@mantine/core'; //Loader removed
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useEffect } from 'react';
