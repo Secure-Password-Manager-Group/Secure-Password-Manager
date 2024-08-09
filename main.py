@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, render_template
+from flask import Flask, request, jsonify, make_response, render_template, send_from_directory
 from flask_cors import CORS
 from google.cloud import datastore
 from google.cloud import storage
@@ -12,7 +12,7 @@ import datetime
 from cryptography.fernet import Fernet
 import uuid
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
 cors = CORS(app)
 app.secret_key = "SECRET_KEY"
 # app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
@@ -59,6 +59,7 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorated
 
+
 # Helper function for def token_required() 
 def get_user_by_public_id(public_id):
     query = client.query(kind="users")
@@ -66,9 +67,10 @@ def get_user_by_public_id(public_id):
     result = list(query.fetch())
     return result[0] if result else None
 
+
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return send_from_directory(app.static_folder, 'index.html')
     
 
 @app.route("/user", methods=["GET"])

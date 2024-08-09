@@ -6,3 +6,4 @@ bcrypt
 pyjwt==2.8.0
 flask-cors==4.0.1
 cryptography==42.0.8
+gunicorn

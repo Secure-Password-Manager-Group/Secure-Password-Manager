@@ -19,4 +19,5 @@ __pycache__/
 /setup.cfg
 
 # Ignore the Python venv
-venv/
+.env
+node_modules/
