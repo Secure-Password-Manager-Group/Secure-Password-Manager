@@ -1,12 +1,4 @@
-import {
-    Button,
-    Center,
-    Loader,
-    Skeleton,
-    Stack,
-    Table,
-    Text
-} from '@mantine/core';
+import { Button, Center, Skeleton, Stack, Table, Text } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
