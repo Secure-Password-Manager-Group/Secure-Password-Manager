@@ -68,17 +68,17 @@ def get_user_by_public_id(public_id):
     return result[0] if result else None
 
 
-@app.route('/health')
+@app.route('/api/health')
 def health():
     return jsonify({"status": "OK"}), 200
     
 
-@app.route("/user", methods=["GET"])
+@app.route("/api/user", methods=["GET"])
 @token_required
 def get_user(current_user):
     return jsonify({"username": current_user['username']}), 200
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login_user():
     content = request.get_json()
     if not content or not content.get('username') or not content.get('password'):
@@ -108,7 +108,7 @@ def login_user():
 
 
 # Create a new site user. Added to users table. 
-@app.route('/signUp', methods=['POST'])
+@app.route('/api/signUp', methods=['POST'])
 def sign_up_user():
     content = request.get_json()
     if not content or not content.get('username') or not content.get('password'):
@@ -140,7 +140,7 @@ def sign_up_user():
     return jsonify({"message": "User created successfully"}), 201
 
 
-@app.route('/passwords', methods=['GET'])
+@app.route('/api/passwords', methods=['GET'])
 @token_required
 def get_passwords(current_user):
     # Filter credentials by user_id that matches the current user's public_id
@@ -162,7 +162,7 @@ def get_passwords(current_user):
         results.append(result)
     return jsonify(results), 200
 
-@app.route("/passwords/<int:id>", methods=["GET"])
+@app.route("/api/passwords/<int:id>", methods=["GET"])
 @token_required
 def get_password_by_id(current_user, id):
     key = client.key("credentials", id)
@@ -183,7 +183,7 @@ def get_password_by_id(current_user, id):
 
 # Add a new entry to the credentials table. User_id will equal the name/id
 # from the users table
-@app.route('/add', methods=['POST'])
+@app.route('/api/add', methods=['POST'])
 @token_required
 def add_password(current_user):
     content = request.get_json()
@@ -202,7 +202,7 @@ def add_password(current_user):
     return jsonify({"message": "Credential stored successfully"}), 201
 
 
-@app.route('/delete/<int:id>', methods=['DELETE'])
+@app.route('/api/delete/<int:id>', methods=['DELETE'])
 @token_required
 def delete_password(current_user, id):
     key = client.key("credentials", id)
@@ -216,7 +216,7 @@ def delete_password(current_user, id):
     return jsonify({"message": "Credential deleted successfully"}), 200
 
 
-@app.route('/update/<int:id>', methods=['PATCH'])
+@app.route('/api/update/<int:id>', methods=['PATCH'])
 @token_required
 def update_password(current_user, id):
     content = request.get_json()
