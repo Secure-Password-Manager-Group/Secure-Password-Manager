@@ -1,4 +1,4 @@
-import { Button, Stack, TextInput } from '@mantine/core'; //alert and group removed
+import { Button, Stack, TextInput, PasswordInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMutation } from '@tanstack/react-query';
@@ -79,19 +79,17 @@ export default function SignupForm({ setTab }: Props) {
                     key={form.key('username')}
                     {...form.getInputProps('username')}
                 />
-                <TextInput
+                <PasswordInput
                     withAsterisk
                     label='Password'
                     placeholder='Password'
-                    type='password'
                     key={form.key('password')}
                     {...form.getInputProps('password')}
                 />
-                <TextInput
+                <PasswordInput
                     withAsterisk
                     label='Confirm Password'
                     placeholder='Confirm Password'
-                    type='password'
                     key={form.key('confirmPassword')}
                     {...form.getInputProps('confirmPassword')}
                 />

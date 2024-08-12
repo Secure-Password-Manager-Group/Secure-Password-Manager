@@ -1,5 +1,4 @@
 import { Skeleton, Stack, Text, Title } from '@mantine/core';
-// removed Loader until it's needed
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useEffect } from 'react';
@@ -43,7 +42,7 @@ export default function EditCredential() {
     const getContent = () => {
         if (isPending || isFetching) {
             return (
-                <Stack gap="xl" mt={20}>
+                <Stack gap='xl' mt={20}>
                     <Skeleton height={40} />
                     <Skeleton height={40} />
                     <Skeleton height={40} />
