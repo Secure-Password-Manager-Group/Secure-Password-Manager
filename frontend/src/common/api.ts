@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL ||
-    'https://secure-password-manager-group.uw.r.appspot.com';
+    'https://secure-password-manager-group.uw.r.appspot.com/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
