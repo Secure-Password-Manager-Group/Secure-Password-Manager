@@ -68,9 +68,9 @@ def get_user_by_public_id(public_id):
     return result[0] if result else None
 
 
-@app.route('/')
-def home():
-    return send_from_directory(app.static_folder, 'index.html')
+@app.route('/health')
+def health():
+    return jsonify({"status": "OK"}), 200
     
 
 @app.route("/user", methods=["GET"])
@@ -236,6 +236,15 @@ def update_password(current_user, id):
 
     client.put(credential)
     return jsonify({"message": "Credential updated successfully"}), 200
+
+@app.route('/')
+def home():
+    return send_from_directory(app.static_folder, 'index.html')
+
+
+@app.route('/<path:path>')
+def catch_all(path):
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 if __name__ == '__main__':
